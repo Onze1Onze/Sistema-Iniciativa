@@ -9,7 +9,7 @@ export function normalizeCombatant(value={}){
  agility:integer(s.agility,1,0,5),training:TRAINING_LEVELS.includes(Number(s.training))?Number(s.training):0,
  bonus:clamp(Number.isFinite(Number(s.bonus))?Number(s.bonus):0,-99,99),
  threatBonus:clamp(Number.isFinite(Number(s.threatBonus))?Number(s.threatBonus):0,-99,99),
- diceModifier:integer(s.diceModifier,0,-5,5),threatDice:integer(s.threatDice,2,1,12),initiative:nullable(s.initiative),
+ initiative:nullable(s.initiative),
  roll:s.roll&&typeof s.roll==="object"&&Array.isArray(s.roll.dice)?{dice:s.roll.dice.map(x=>integer(x,1,1,20)).slice(0,24),selected:integer(s.roll.selected,1,1,20),keep:s.roll.keep==="lowest"?"lowest":"highest",bonus:clamp(Number(s.roll.bonus)||0,-199,199),total:nullable(s.roll.total)}:null,
  surprised:s.surprised===true,availableFromRound:integer(s.availableFromRound,1,1,99999),
  conditions:Array.isArray(s.conditions)?s.conditions.map(x=>String(x).trim()).filter(Boolean).slice(0,8):[],
@@ -20,9 +20,9 @@ export function normalizeSceneState(value={}){
  return {started:s.started===true,round:Number.isInteger(r)?clamp(r,1,99999):1,activeId:typeof s.activeId==="string"?s.activeId:null,changedAt:Number.isFinite(Number(s.changedAt))?Number(s.changedAt):0};
 }
 function getPool(combatant){
- const d=normalizeCombatant(combatant),base=d.role==="THREAT"?d.threatDice:(d.agility===0?2:d.agility),adjusted=base+d.diceModifier;
- if(adjusted<1)return {count:clamp(base+Math.abs(d.diceModifier),1,24),keep:"lowest"};
- return {count:clamp(adjusted,1,24),keep:d.role==="AGENT"&&d.agility===0?"lowest":"highest"};
+ const d=normalizeCombatant(combatant);
+ if(d.role==="THREAT")return {count:1,keep:"highest"};
+ return d.agility===0?{count:2,keep:"lowest"}:{count:d.agility,keep:"highest"};
 }
 export function rollInitiativeTest(combatant,random=Math.random){
  const d=normalizeCombatant(combatant),pool=getPool(d);
@@ -36,7 +36,7 @@ export function sortCombatants(entries){
  if(rs!==ls)return rs-ls;if(l.addedAt!==r.addedAt)return l.addedAt-r.addedAt;return String(a.id).localeCompare(String(b.id),"pt-BR",{sensitivity:"base"});});
 }
 export function findInitiativeTies(entries){
- const m=new Map();for(const e of entries){const v=normalizeCombatant(e.combatant).initiative;if(v===null)continue;const g=m.get(v)||[];g.push(e);m.set(v,g);}
+ const m=new Map();for(const e of entries){const d=normalizeCombatant(e.combatant),v=d.initiative;if(v===null||!d.roll)continue;const g=m.get(v)||[];g.push(e);m.set(v,g);}
  return [...m.entries()].filter(([,g])=>g.length>1).map(([initiative,entries])=>({initiative,entries}));
 }
 export function isEligibleInRound(entry,round){const d=normalizeCombatant(entry.combatant);return d.availableFromRound<=round&&(!d.surprised||round>1);}

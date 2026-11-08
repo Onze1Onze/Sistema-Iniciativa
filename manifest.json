@@ -1,10 +1,10 @@
 {
   "name":"Ordem Paranormal · Iniciativa",
-  "version":"2.0.0",
+  "version":"2.0.1",
   "manifest_version":1,
   "description":"Protocolo de combate vertical para Ordem Paranormal RPG.",
   "author":"Onze1Onze",
   "icon":"/Sistema-Iniciativa/icon.svg",
-  "background_url":"/Sistema-Iniciativa/background.html?v=2.0.0",
+  "background_url":"/Sistema-Iniciativa/background.html?v=2.0.1",
   "action":{"title":"Ordem Paranormal · Protocolo de Combate","icon":"/Sistema-Iniciativa/icon.svg","popover":"/Sistema-Iniciativa/","width":420,"height":780}
 }

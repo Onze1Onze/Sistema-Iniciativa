@@ -185,3 +185,14 @@ main{padding:19px 25px 12px;max-width:1120px;margin:0 auto}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Character portraits: use the actual Owlbear token artwork in initiative avatars. */
+.timeline-avatar,
+.combatant-avatar{position:relative;overflow:hidden}
+.timeline-avatar.has-portrait,
+.combatant-avatar.has-portrait{background:#202b2f}
+.avatar-fallback{display:grid;width:100%;height:100%;place-items:center}
+.has-portrait>.avatar-fallback{display:none}
+.timeline-avatar img,
+.combatant-avatar img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:inherit;user-select:none;pointer-events:none}
+.timeline-card.is-active .timeline-avatar.has-portrait{box-shadow:0 0 0 1px #f0d091a6,0 0 15px #e3ba7255}

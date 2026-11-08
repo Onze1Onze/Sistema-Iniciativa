@@ -7,7 +7,8 @@ import {
   advanceTurn,
   selectTurn,
   rollD20,
-  progressPercent
+  progressPercent,
+  getPortraitUrl
 } from "../core.js";
 
 const actors = [
@@ -82,4 +83,12 @@ test("round progress is based on current actor position", () => {
   assert.equal(progressPercent(actors, { activeId: "b" }), 33);
   assert.equal(progressPercent(actors, { activeId: "c" }), 100);
   assert.equal(progressPercent([], { activeId: null }), 0);
+});
+
+test("portrait URL is read from Owlbear image items and unsafe URLs are rejected", () => {
+  assert.equal(getPortraitUrl({ type: "IMAGE", image: { url: "https://assets.example/token.webp" } }), "https://assets.example/token.webp");
+  assert.equal(getPortraitUrl({ type: "IMAGE", image: { url: "http://assets.example/token.png" } }), "http://assets.example/token.png");
+  assert.equal(getPortraitUrl({ type: "IMAGE", image: { url: "javascript:alert(1)" } }), null);
+  assert.equal(getPortraitUrl({ type: "SHAPE", image: { url: "https://assets.example/not-a-token.png" } }), null);
+  assert.equal(getPortraitUrl({ type: "IMAGE" }), null);
 });

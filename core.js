@@ -107,3 +107,8 @@ export function initials(name = "") {
   return (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : parts[0].slice(0, 2))
     .toLocaleUpperCase("pt-BR");
 }
+
+export function getPortraitUrl(item) {
+  const url = item?.type === "IMAGE" ? item.image?.url : null;
+  return typeof url === "string" && /^https?:\/\/[^\s]+$/i.test(url) ? url : null;
+}

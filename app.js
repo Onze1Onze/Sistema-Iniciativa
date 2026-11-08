@@ -8,7 +8,8 @@ import {
   selectTurn,
   rollD20,
   progressPercent,
-  initials
+  initials,
+  getPortraitUrl
 } from "./core.js?v=1.0.0";
 
 const EXTENSION_ID = "com.onze1onze.sistema-iniciativa";
@@ -39,6 +40,7 @@ function getParticipants() {
     participants.push({
       id: item.id,
       name: item.name || "Combatente",
+      imageUrl: getPortraitUrl(item),
       combatant: normalizeCombatant(raw)
     });
   }
@@ -104,6 +106,28 @@ function render() {
   renderCombatants(participants, active);
 }
 
+function portraitMarkup(entry, className) {
+  const displayName = entry.combatant.displayName || entry.name;
+  const imageUrl = entry.imageUrl;
+  const portrait = imageUrl
+    ? '<img data-portrait src="' + escapeHTML(imageUrl) + '" alt="" loading="lazy" draggable="false">'
+    : "";
+  return '<span class="' + className + (imageUrl ? ' has-portrait' : '') + '" aria-hidden="true">' +
+    '<span class="avatar-fallback">' + escapeHTML(initials(displayName)) + '</span>' +
+    portrait +
+    '</span>';
+}
+
+function bindPortraitFallback(root) {
+  root.querySelectorAll("img[data-portrait]").forEach((image) => {
+    image.addEventListener("error", () => {
+      const avatar = image.parentElement;
+      image.remove();
+      avatar?.classList.remove("has-portrait");
+    }, { once: true });
+  });
+}
+
 function renderTimeline(participants, active) {
   const root = $("#timeline");
   if (!participants.length) {
@@ -119,11 +143,12 @@ function renderTimeline(participants, active) {
       : "";
     return '<button class="timeline-card ' + (isActive ? "is-active" : "") + '" type="button" data-action="activate" data-id="' + escapeHTML(entry.id) + '" style="--card-index:' + index + '" title="Ativar turno de ' + escapeHTML(display) + '">' +
       '<span class="timeline-top"><span class="timeline-number">' + String(index + 1).padStart(2, "0") + '</span><span class="timeline-initiative">' + escapeHTML(entry.combatant.initiative) + '</span></span>' +
-      '<span class="timeline-avatar">' + escapeHTML(initials(display)) + '</span>' +
+      portraitMarkup(entry, "timeline-avatar") +
       '<span class="timeline-name">' + escapeHTML(display) + '</span>' + conditions +
       (isActive ? '<span class="active-marker">AGORA</span>' : "") +
     '</button>';
   }).join('<span class="timeline-connector" aria-hidden="true">›</span>');
+  bindPortraitFallback(root);
 }
 
 function renderCombatants(participants, active) {
@@ -141,13 +166,14 @@ function renderCombatants(participants, active) {
       : '<span class="no-condition">—</span>';
     const isActive = entry.id === active?.id;
     return '<article class="combatant-row ' + (isActive ? "is-active" : "") + '" data-id="' + escapeHTML(entry.id) + '" style="--row-index:' + index + '">' +
-      '<div class="combatant-identity"><span class="rank-badge">' + String(index + 1).padStart(2, "0") + '</span><span class="combatant-avatar">' + escapeHTML(initials(display)) + '</span><span class="combatant-names"><strong>' + escapeHTML(display) + '</strong><small>' + (isActive ? '<i class="live-dot"></i> TURNO ATUAL' : escapeHTML(entry.name)) + '</small></span></div>' +
+      '<div class="combatant-identity"><span class="rank-badge">' + String(index + 1).padStart(2, "0") + '</span>' + portraitMarkup(entry, "combatant-avatar") + '<span class="combatant-names"><strong>' + escapeHTML(display) + '</strong><small>' + (isActive ? '<i class="live-dot"></i> TURNO ATUAL' : escapeHTML(entry.name)) + '</small></span></div>' +
       '<div class="initiative-cell"><strong>' + escapeHTML(data.initiative) + '</strong><small>INICIATIVA</small></div>' +
       '<div class="conditions-cell">' + conditions + '</div>' +
       '<div class="row-actions"><button class="row-action" data-action="activate" data-id="' + escapeHTML(entry.id) + '" type="button" title="Definir turno atual">▶</button><button class="row-action" data-action="edit" data-id="' + escapeHTML(entry.id) + '" type="button" title="Editar combatente">✎</button><button class="row-action danger" data-action="remove" data-id="' + escapeHTML(entry.id) + '" type="button" title="Remover da iniciativa">×</button></div>' +
     '</article>' +
     (data.note ? '<div class="combatant-note"><span>NOTA</span> ' + escapeHTML(data.note) + '</div>' : "");
   }).join("");
+  bindPortraitFallback(root);
 }
 
 async function refreshScene() {

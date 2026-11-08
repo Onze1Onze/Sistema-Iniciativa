@@ -29,6 +29,7 @@ Se ainda aparecer 404, abra [Settings → Pages](https://github.com/Onze1Onze/Si
 ## Recursos
 
 - Linha horizontal de iniciativa com destaque do turno ativo e prévia dos próximos combatentes.
+- Miniaturas circulares com a imagem real de cada token, tanto na linha de iniciativa quanto no quadro de combate; usa iniciais automaticamente como fallback quando a imagem não carrega.
 - Lista completa ordenada por iniciativa decrescente, desempate por nome.
 - Rodada atual, progresso do encontro e estado de combate.
 - Rolagem rápida de d20, ajuste manual da iniciativa e edição de nome exibido.

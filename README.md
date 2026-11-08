@@ -1,73 +1,56 @@
-# Sistema de Iniciativa — Owlbear Rodeo
+# Ordem Paranormal · Protocolo de Combate
 
-Tracker de combate para Owlbear Rodeo com ordem sincronizada, painel cinematográfico, avanço de turnos e controles por personagem.
+Tracker vertical para Owlbear Rodeo, adaptado às regras-base de **Ordem Paranormal RPG (livro original, versão 1.2)**.
+
+## Identidade visual
+Painel vertical e compacto com referências de arquivos de investigação, relatórios restritos, carimbos de evidência, papel gasto, grafite, preto e vermelho de alerta. Os elementos gráficos são originais e não dependem de logotipos ou ilustrações proprietárias.
 
 ## Instalação
+1. Abra **Settings → Pages**.
+2. Selecione **Deploy from a branch**, branch \`main\` e pasta \`/(root)\`.
+3. Adicione no Owlbear Rodeo: \`https://Onze1Onze.github.io/Sistema-Iniciativa/manifest.json\`.
 
-1. No GitHub, abra **Settings → Pages**.
-2. Em **Build and deployment**, selecione **Deploy from a branch**.
-3. Escolha a branch `main` e a pasta `/(root)`.
-4. Aguarde o GitHub Pages publicar o site.
-5. No Owlbear Rodeo, adicione uma extensão usando este manifesto:
+## Regras
+- Agentes usam a perícia **Iniciativa (Agilidade)**: 1d20 por ponto de AGI, escolhe o maior e soma o treinamento.
+- AGI 0: 2d20, escolhe o menor.
+- Treinamento: destreinado +0, treinado +5, veterano +10, expert +15.
+- Ameaças: o mestre pode registrar vários tokens como um único grupo e usar um teste compartilhado; informe o menor bônus do grupo quando forem diferentes.
+- Empates são resolvidos com novas rolagens dos envolvidos.
+- Surpreendidos não agem na primeira rodada.
+- Entradas tardias só ficam elegíveis na rodada seguinte.
+- Iniciativa não é rolada de novo a cada rodada.
+- Ordem decrescente dos resultados; apenas participantes elegíveis podem ser ativados.
 
-   `https://Onze1Onze.github.io/Sistema-Iniciativa/manifest.json`
-
-6. Habilite a extensão na sala.
-
-Se ainda aparecer 404, abra [Settings → Pages](https://github.com/Onze1Onze/Sistema-Iniciativa/settings/pages) e confirme que a publicação está configurada em `main` / `/(root)`. O GitHub Pages precisa ser ativado nessa tela pelo proprietário ou mantenedor do repositório; o código sozinho não ativa a hospedagem.
-
-## Uso
-
-- Use a ação **Sistema de Iniciativa** na barra superior da sala para abrir o painel.
-- Selecione um ou mais tokens da camada **Personagem** e use **Adicionar selecionados** ou o menu contextual **Alternar na iniciativa**.
-- Cada combatente recebe uma rolagem inicial de d20; o valor pode ser editado manualmente.
-- **Iniciar combate** define o primeiro turno da ordem.
-- **Próximo turno** avança o destaque; ao ultrapassar o último combatente, a rodada aumenta.
-- O controle de turno permite selecionar diretamente um combatente.
-- **Remover** tira o personagem do encontro. **Limpar encontro** remove todos os participantes e encerra o combate.
-
-## Recursos
-
-- Linha horizontal de iniciativa com destaque do turno ativo e prévia dos próximos combatentes.
-- Miniaturas circulares com a imagem real de cada token, tanto na linha de iniciativa quanto no quadro de combate; usa iniciais automaticamente como fallback quando a imagem não carrega.
-- Lista completa ordenada por iniciativa decrescente, desempate por nome.
-- Rodada atual, progresso do encontro e estado de combate.
-- Rolagem rápida de d20, ajuste manual da iniciativa e edição de nome exibido.
-- Condições rápidas por participante, observações e controle de participação.
-- Animações de entrada, mudança de turno, foco e feedback; respeita `prefers-reduced-motion`.
-- Estado de cada participante salvo nos metadados do token; rodada e turno ativo salvos nos metadados da cena.
-- Atualização em tempo real para os jogadores conectados.
+## Interface
+- Painel estreito e vertical.
+- Cartão do turno atual com retrato e progresso.
+- Fila vertical de participantes.
+- Miniaturas dos tokens com iniciais como fallback.
+- Marcadores de surpresa, empate, entrada tardia e condições.
+- Animações curtas, respeitando \`prefers-reduced-motion\`.
 
 ## Dados e compatibilidade
+- SDK \`@owlbear-rodeo/sdk@3.1.0\`.
+- Metadados dos tokens e da cena, com namespace próprio.
+- Não requer servidor nem banco externo.
+- Dados de iniciativa antigos são preservados até uma nova rolagem.
+- O menu contextual permite adicionar/remover agentes. Para agrupar ameaças use o painel.
 
-- SDK oficial `@owlbear-rodeo/sdk@3.1.0`, carregado como módulo ESM.
-- Sem servidor próprio ou banco externo. O GitHub Pages entrega os arquivos estáticos.
-- Namespace de metadados: `com.onze1onze.sistema-iniciativa`.
-- A extensão lê e grava somente os metadados próprios nos tokens e na cena.
-- A ordem e o estado do encontro são compartilhados pela própria cena do Owlbear Rodeo.
-- Alterações simultâneas de diferentes usuários podem conflitar conforme o modelo de sincronização do Owlbear; recomenda-se que o mestre controle os avanços de turno.
+## Testes
+- \`npm run check\`
+- \`npm test\`
+- GitHub Actions executa os dois em cada push e pull request.
 
-## Desenvolvimento e testes
+## Limitações
+- O SDK não oferece bloqueio transacional para alterações simultâneas; recomenda-se que apenas o mestre controle os turnos.
+- A ficha não é lida automaticamente e PV/PE/Sanidade não são alterados.
+- A integração final precisa ser verificada em uma sala real do Owlbear com dois ou mais clientes.
 
-Não há etapa de build. Os arquivos estáticos podem ser servidos diretamente pelo GitHub Pages.
-
-Arquivos principais:
-- `manifest.json`: registro da ação do Owlbear e página de fundo.
-- `index.html`, `styles.css`, `app.js`: painel e interface.
-- `background.html`, `background.js`: integração do menu contextual.
-- `core.js`: regras puras de ordenação, d20 e ciclo de turnos.
-- `icon.svg`, `icons/`: ícones da extensão.
-- `tests/initiative.test.mjs`: testes unitários das regras de iniciativa.
-
-Execute com Node.js 18 ou superior:
-
-- `npm run check` — valida a sintaxe dos módulos JavaScript.
-- `npm test` — executa os testes unitários.
-
-O GitHub Actions executa essas verificações em cada push e pull request para `main`.
-
-## Limitações conhecidas
-
-- O SDK não disponibiliza um bloqueio transacional para garantir que apenas uma pessoa avance o combate; combine quem controla os turnos.
-- A extensão não movimenta tokens, não altera HP e não aplica condições nativas na mesa. As condições são marcadores visuais próprios do tracker.
-- O teste final de integração deve ser realizado em uma sala real do Owlbear Rodeo, com dois ou mais clientes conectados.
+## Referências técnicas
+- https://docs.owlbear.rodeo/extensions/getting-started/
+- https://docs.owlbear.rodeo/extensions/tutorial-initiative-tracker/
+- https://docs.owlbear.rodeo/extensions/reference/manifest/
+- https://docs.owlbear.rodeo/extensions/apis/scene/items/
+- https://docs.owlbear.rodeo/extensions/reference/metadata/
+- https://docs.owlbear.rodeo/extensions/apis/context-menu/
+- Ordem Paranormal RPG, Livro de Regras v1.2, capítulo 4, páginas 82–83.

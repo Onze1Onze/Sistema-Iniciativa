@@ -1,94 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  normalizeCombatant,
-  normalizeSceneState,
-  sortCombatants,
-  advanceTurn,
-  selectTurn,
-  rollD20,
-  progressPercent,
-  getPortraitUrl
-} from "../core.js";
-
-const actors = [
-  { id: "a", name: "Arqueiro", combatant: { initiative: 12, displayName: "Arqueiro" } },
-  { id: "b", name: "Bruxa", combatant: { initiative: 19, displayName: "Bruxa" } },
-  { id: "c", name: "Cavaleiro", combatant: { initiative: 12, displayName: "Cavaleiro" } }
-];
-
-test("combatant data is normalized and bounded", () => {
-  assert.deepEqual(normalizeCombatant({ initiative: "21", conditions: ["Caído", "", "Atordoado"], note: "x".repeat(600) }), {
-    initiative: 21, displayName: "", conditions: ["Caído", "Atordoado"], note: "x".repeat(500), addedAt: 0
-  });
-  assert.equal(normalizeCombatant({ initiative: 5000 }).initiative, 999);
-  assert.equal(normalizeCombatant({ initiative: "invalid" }).initiative, 0);
-});
-
-test("scene state keeps a valid round and active id", () => {
-  assert.deepEqual(normalizeSceneState({ started: true, round: 0, activeId: "actor" }), {
-    started: true, round: 1, activeId: "actor", changedAt: 0
-  });
-  assert.equal(normalizeSceneState({ round: 100000 }).round, 99999);
-});
-
-test("initiative order is descending and ties are deterministic by name", () => {
-  assert.deepEqual(sortCombatants(actors).map((entry) => entry.id), ["b", "a", "c"]);
-});
-
-test("next turn starts at first actor and wraps into the next round", () => {
-  const first = advanceTurn(actors, { round: 1, started: false, activeId: null }, 1, 100);
-  assert.equal(first.activeId, "b");
-  assert.equal(first.round, 1);
-  const second = advanceTurn(actors, first, 1, 101);
-  assert.equal(second.activeId, "a");
-  const third = advanceTurn(actors, second, 1, 102);
-  assert.equal(third.activeId, "c");
-  const wrapped = advanceTurn(actors, third, 1, 103);
-  assert.equal(wrapped.activeId, "b");
-  assert.equal(wrapped.round, 2);
-});
-
-test("previous turn wraps to previous round without allowing round zero", () => {
-  const state = { round: 1, started: true, activeId: "b" };
-  const previous = advanceTurn(actors, state, -1, 200);
-  assert.equal(previous.activeId, "c");
-  assert.equal(previous.round, 1);
-  const nextPrevious = advanceTurn(actors, { ...state, round: 4, activeId: "b" }, -1, 201);
-  assert.equal(nextPrevious.activeId, "c");
-  assert.equal(nextPrevious.round, 3);
-});
-
-test("selectTurn rejects unknown ids and activates valid participants", () => {
-  const state = { round: 2, started: false, activeId: null };
-  assert.deepEqual(selectTurn(actors, state, "missing"), normalizeSceneState(state));
-  const selected = selectTurn(actors, state, "a", 99);
-  assert.equal(selected.activeId, "a");
-  assert.equal(selected.started, true);
-  assert.equal(selected.round, 2);
-});
-
-test("empty combatant list safely stops turn progression", () => {
-  const state = advanceTurn([], { round: 3, started: true, activeId: "old" }, 1, 300);
-  assert.equal(state.started, false);
-  assert.equal(state.activeId, null);
-});
-
-test("d20 roller stays between one and twenty", () => {
-  assert.equal(rollD20(() => 0), 1);
-  assert.equal(rollD20(() => 0.99999), 20);
-});
-
-test("round progress is based on current actor position", () => {
-  assert.equal(progressPercent(actors, { activeId: "b" }), 33);
-  assert.equal(progressPercent(actors, { activeId: "c" }), 100);
-  assert.equal(progressPercent([], { activeId: null }), 0);
-});
-
-test("portrait URL is read from Owlbear image items and unsafe URLs are rejected", () => {
-  assert.equal(getPortraitUrl({ type: "IMAGE", image: { url: "https://assets.example/token.webp" } }), "https://assets.example/token.webp");
-  assert.equal(getPortraitUrl({ type: "IMAGE", image: { url: "http://assets.example/token.png" } }), "http://assets.example/token.png");
-  assert.equal(getPortraitUrl({ type: "IMAGE", image: { url: "javascript:alert(1)" } }), null);
-  assert.equal(getPortraitUrl({ type: "SHAPE", image: { url: "https://assets.example/not-a-token.png" } }), null);
-  assert.equal(getPortraitUrl({ type: "IMAGE" }), null);
-});
+import {normalizeCombatant,normalizeSceneState,rollInitiativeTest,sortCombatants,findInitiativeTies,isEligibleInRound,advanceTurn,selectTurn,progressPercent,getPortraitUrl} from "../core.js";
+const actors=[{id:"a",combatant:{initiative:12,addedAt:1}},{id:"b",combatant:{initiative:19,addedAt:2}},{id:"c",combatant:{initiative:12,addedAt:3}}];
+test("normalization preserves legacy initiative and bounds attributes",()=>{const v=normalizeCombatant({agility:8,training:10,bonus:"4",diceModifier:-2});assert.equal(v.agility,5);assert.equal(v.training,10);assert.equal(v.bonus,4);assert.equal(v.diceModifier,-2);assert.equal(normalizeCombatant({initiative:17}).initiative,17);assert.equal(normalizeCombatant({initiative:null}).initiative,null);});
+test("agent rolls one d20 per Agility point, keeps highest and adds training",()=>{const a=[.1,.8,.4],r=rollInitiativeTest({role:"AGENT",agility:3,training:5},()=>a.shift());assert.deepEqual(r.roll.dice,[3,17,9]);assert.equal(r.roll.selected,17);assert.equal(r.initiative,22);});
+test("Agility zero rolls two d20 and keeps lowest",()=>{const a=[.9,.2],r=rollInitiativeTest({role:"AGENT",agility:0},()=>a.shift());assert.deepEqual(r.roll.dice,[19,5]);assert.equal(r.roll.keep,"lowest");assert.equal(r.initiative,5);});
+test("negative dice modifier below one die keeps worst result",()=>{const a=[.9,.7],r=rollInitiativeTest({role:"AGENT",agility:1,diceModifier:-1},()=>a.shift());assert.equal(r.roll.dice.length,2);assert.equal(r.roll.keep,"lowest");assert.equal(r.initiative,15);});
+test("threat group uses one stat-block pool and shared bonus",()=>{const a=[.25,.95],r=rollInitiativeTest({role:"THREAT",threatDice:2,threatBonus:7,bonus:2},()=>a.shift());assert.deepEqual(r.roll.dice,[6,20]);assert.equal(r.roll.bonus,9);assert.equal(r.initiative,29);});
+test("initiative sorts descending and identifies ties",()=>{assert.deepEqual(sortCombatants(actors).map(x=>x.id),["b","a","c"]);assert.equal(findInitiativeTies(actors).length,1);assert.deepEqual(findInitiativeTies(actors)[0].entries.map(x=>x.id),["a","c"]);});
+test("surprised actors are skipped only in first round",()=>{const e={id:"s",combatant:{initiative:20,surprised:true}};assert.equal(isEligibleInRound(e,1),false);assert.equal(isEligibleInRound(e,2),true);});
+test("late entrants become eligible in their next round",()=>{const e={id:"late",combatant:{initiative:20,availableFromRound:3}};assert.equal(isEligibleInRound(e,2),false);assert.equal(isEligibleInRound(e,3),true);});
+test("turn progression skips surprise and increments round",()=>{const entries=[{id:"s",combatant:{initiative:20,surprised:true}},{id:"a",combatant:{initiative:10}}],first=advanceTurn(entries,{started:false,round:1,activeId:null},1,100);assert.equal(first.round,1);assert.equal(first.activeId,"a");const next=advanceTurn(entries,first,1,101);assert.equal(next.round,2);assert.equal(next.activeId,"s");});
+test("only-surprised combat automatically passes to first actionable round",()=>{const e=[{id:"s",combatant:{initiative:9,surprised:true}}],r=advanceTurn(e,{started:false,round:1,activeId:null},1,100);assert.equal(r.round,2);assert.equal(r.activeId,"s");});
+test("manual selection rejects surprised and late entrants until eligible",()=>{const e=[{id:"s",combatant:{initiative:20,surprised:true}},{id:"late",combatant:{initiative:15,availableFromRound:2}}],s={started:true,round:1,activeId:null};assert.equal(selectTurn(e,s,"s").activeId,null);assert.equal(selectTurn(e,s,"late").activeId,null);assert.equal(selectTurn(e,{...s,round:2},"late").activeId,"late");});
+test("previous turn wraps to last eligible actor in previous round",()=>{const r=advanceTurn(actors,{started:true,round:2,activeId:"b"},-1);assert.equal(r.round,1);assert.equal(r.activeId,"c");});
+test("progress ignores actors unable to act in current round",()=>{const e=[{id:"s",combatant:{initiative:20,surprised:true}},{id:"a",combatant:{initiative:10}}];assert.equal(progressPercent(e,{round:1,activeId:"a"}),100);});
+test("portrait helper accepts only safe image token URLs",()=>{assert.equal(getPortraitUrl({type:"IMAGE",image:{url:"https://assets.example/token.webp"}}),"https://assets.example/token.webp");assert.equal(getPortraitUrl({type:"SHAPE",image:{url:"https://assets.example/file.png"}}),null);assert.equal(getPortraitUrl({type:"IMAGE",image:{url:"javascript:alert(1)"}}),null);});
+test("scene normalization clamps invalid rounds",()=>{assert.equal(normalizeSceneState({round:-4}).round,1);assert.equal(normalizeSceneState({round:12,started:true}).round,12);});

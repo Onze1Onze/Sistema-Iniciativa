@@ -5,139 +5,168 @@
   <base href="/Sistema-Iniciativa/">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#101519">
-  <title>Sistema de Iniciativa</title>
+  <meta name="theme-color" content="#100e10">
+  <title>Ordem Paranormal · Iniciativa</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=1.0.2">
+  <link rel="stylesheet" href="./styles.css?v=2.0.0">
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
-        <div>
-          <p class="eyebrow">COMBAT MANAGEMENT SYSTEM</p>
-          <h1>Sistema <em>Iniciativa</em></h1>
+        <div class="brand-sigil" aria-hidden="true"><span class="sigil-ring"></span><span class="sigil-mark">✣</span></div>
+        <div class="brand-copy">
+          <p class="eyebrow">ORDO REALITAS · DIVISÃO DE OPERAÇÕES</p>
+          <h1>PROTOCOLO <em>DE COMBATE</em></h1>
         </div>
       </div>
-      <div class="topbar-right">
-        <span id="connection" class="connection"><i></i> Conectando</span>
-        <button id="refresh" class="icon-button" type="button" title="Atualizar painel" aria-label="Atualizar painel">↻</button>
+      <div class="header-state">
+        <span id="connection" class="connection"><i></i> CONECTANDO</span>
+        <button id="refresh" class="icon-button" type="button" title="Atualizar dados" aria-label="Atualizar dados">⟳</button>
       </div>
     </header>
 
     <main>
-      <section class="combat-overview">
-        <div class="overview-copy">
-          <div class="eyebrow">ENCONTRO ATUAL</div>
-          <div class="overview-title">
-            <h2 id="combat-title">Preparação do encontro</h2>
-            <span id="combat-state" class="state-pill is-idle">INATIVO</span>
-          </div>
-          <p id="combat-subtitle">Adicione personagens para organizar a ordem de ação.</p>
+      <section class="case-strip">
+        <div class="case-label">
+          <span class="eyebrow">REGISTRO DE OCORRÊNCIA</span>
+          <strong id="combat-title">CENA NÃO INICIADA</strong>
+          <span id="combat-subtitle">Aguardando identificação dos envolvidos.</span>
         </div>
-        <div class="round-counter">
-          <span class="eyebrow">RODADA</span>
+        <div class="round-stamp">
+          <span>RODADA</span>
           <strong id="round-number">—</strong>
         </div>
       </section>
 
-      <section class="turn-banner" id="turn-banner" aria-live="polite">
-        <div class="turn-emblem"><span class="emblem-core">✦</span></div>
-        <div class="turn-copy">
-          <span class="eyebrow">TURNO ATUAL</span>
-          <strong id="active-name">Nenhum combatente ativo</strong>
-          <span id="active-meta">Inicie o encontro para definir o primeiro turno.</span>
+      <section id="turn-banner" class="turn-banner" aria-live="polite">
+        <div id="active-portrait" class="active-portrait"><span>?</span></div>
+        <div class="turn-main">
+          <span class="eyebrow">AGENTE EM AÇÃO</span>
+          <strong id="active-name">Nenhum turno ativo</strong>
+          <span id="active-meta">Inicie o combate para estabelecer a ordem.</span>
         </div>
         <div class="turn-progress">
-          <div class="progress-label"><span>PROGRESSO DA RODADA</span><b id="progress-value">0%</b></div>
+          <div class="progress-copy"><span>SEQUÊNCIA</span><b id="progress-value">0%</b></div>
           <div class="progress-track"><i id="progress-bar"></i></div>
         </div>
       </section>
 
-      <section class="timeline-section">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">ORDEM DE COMBATE</span>
-            <h3>Linha de iniciativa</h3>
-          </div>
-          <span id="timeline-count" class="subtle-count">0 PARTICIPANTES</span>
-        </div>
-        <div id="timeline" class="timeline" aria-label="Linha de iniciativa">
-          <div class="empty-timeline">A linha de iniciativa aparecerá aqui.</div>
-        </div>
+      <section class="rule-note">
+        <span class="rule-symbol">!</span>
+        <p><b>INICIATIVA · AGILIDADE</b> — role d20 por ponto de AGI, escolha o maior e some o treinamento. AGI 0: 2d20, menor resultado. Empates exigem nova rolagem.</p>
       </section>
 
-      <section class="control-bar">
-        <div class="control-group">
-          <button id="add-selected" class="button button-secondary" type="button"><span class="button-icon">＋</span> Adicionar selecionados</button>
-          <button id="roll-all" class="button button-quiet" type="button" title="Rolar novamente a iniciativa de todos">↻ Rolar todos</button>
+      <section class="controls-panel">
+        <div class="section-kicker"><span>CONTROLE DA OPERAÇÃO</span><i></i></div>
+        <button id="add-selected" class="action-button secondary" type="button"><span class="action-icon">＋</span><span><b>RECRUTAR ENVOLVIDOS</b><small>Adicionar tokens selecionados</small></span></button>
+        <button id="roll-initiative" class="action-button primary" type="button"><span class="action-icon">◉</span><span><b>ROLAR INICIATIVA</b><small id="roll-caption">Realizar os testes da cena</small></span></button>
+        <button id="resolve-ties" class="action-button warning" type="button" hidden><span class="action-icon">⚄</span><span><b>DESEMPATAR</b><small id="tie-caption">Rolar novamente os envolvidos empatados</small></span></button>
+        <div class="turn-controls">
+          <button id="previous-turn" class="action-button minor" type="button" disabled><span class="action-icon">‹</span><span><b>TURNO ANTERIOR</b><small>Voltar na ordem</small></span></button>
+          <button id="next-turn" class="action-button minor" type="button" disabled><span class="action-icon">›</span><span><b>PRÓXIMO TURNO</b><small>Avançar na ordem</small></span></button>
         </div>
-        <div class="control-group turn-controls">
-          <button id="previous-turn" class="button button-quiet square-button" type="button" title="Turno anterior" aria-label="Turno anterior">‹</button>
-          <button id="start-combat" class="button button-primary" type="button">Iniciar combate <span>▶</span></button>
-          <button id="next-turn" class="button button-primary next-button" type="button" disabled>Próximo turno <span>→</span></button>
+        <div class="bottom-controls">
+          <button id="start-combat" class="text-action" type="button" disabled>▶ INICIAR COMBATE</button>
+          <button id="end-combat" class="text-action danger" type="button" hidden>ENCERRAR CENA</button>
+          <button id="clear-combat" class="text-action danger" type="button" disabled>LIMPAR REGISTRO</button>
         </div>
+        <p id="phase-note" class="phase-note">Cadastre os agentes e as ameaças, revise os dados e role a iniciativa.</p>
       </section>
 
-      <section class="combatants-section">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">PARTICIPANTES</span>
-            <h3>Quadro de combate</h3>
-          </div>
-          <div class="heading-actions">
-            <span id="combatant-count" class="subtle-count">0 NA ORDEM</span>
-            <button id="clear-combat" class="text-button" type="button">Limpar encontro</button>
-          </div>
+      <section class="participants-section">
+        <div class="participants-heading">
+          <div><span class="eyebrow">QUADRO TÁTICO</span><h2>ORDEM DE AÇÃO</h2></div>
+          <span id="participant-count" class="count-stamp">00 REGISTROS</span>
         </div>
-        <div class="table-head">
-          <span>COMBATENTE</span>
-          <span>INICIATIVA</span>
-          <span>CONDIÇÕES</span>
-          <span>AÇÕES</span>
-        </div>
-        <div id="combatant-list" class="combatant-list">
-          <div class="empty-state">
-            <div class="empty-glyph">✧</div>
-            <strong>Nenhum participante registrado</strong>
-            <p>Selecione tokens da camada Personagem e adicione-os ao encontro.</p>
-          </div>
+        <div id="initiative-list" class="initiative-list">
+          <div class="empty-state"><span class="empty-mark">✣</span><b>NENHUM ENVOLVIDO REGISTRADO</b><p>Selecione tokens da camada Personagem e recrute-os para esta ocorrência.</p></div>
         </div>
       </section>
     </main>
 
     <footer class="app-footer">
-      <span>INICIATIVA <b>·</b> SINCRONIZADA COM A CENA</span>
-      <span id="save-state">Aguardando sala do Owlbear Rodeo</span>
+      <span>ARQUIVO <b>OR-01</b> · COMBATE</span>
+      <span id="save-state">AGUARDANDO SALA DO OWLBEAR</span>
     </footer>
   </div>
 
-  <dialog id="edit-dialog" class="edit-dialog">
+  <dialog id="add-dialog" class="record-dialog">
+    <form id="add-form">
+      <div class="dialog-heading">
+        <div><span class="eyebrow">NOVO REGISTRO · <b id="add-count">0 TOKENS</b></span><h2>IDENTIFICAR ENVOLVIDOS</h2></div>
+        <button id="close-add" class="icon-button" type="button" aria-label="Fechar">×</button>
+      </div>
+      <label for="add-role">TIPO DE ENVOLVIDO</label>
+      <select id="add-role">
+        <option value="AGENT">Agente / personagem</option>
+        <option value="THREAT">Ameaças — grupo do mestre</option>
+      </select>
+      <div id="add-name-wrap" hidden>
+        <label for="add-name">IDENTIFICAÇÃO DO GRUPO</label>
+        <input id="add-name" maxlength="80" value="Ameaças" autocomplete="off">
+      </div>
+      <div id="add-agent-fields">
+        <div class="form-grid">
+          <div><label for="add-agility">AGILIDADE (0–5)</label><input id="add-agility" type="number" min="0" max="5" step="1" value="1" required></div>
+          <div><label for="add-training">TREINAMENTO</label><select id="add-training"><option value="0">Destreinado +0</option><option value="5">Treinado +5</option><option value="10">Veterano +10</option><option value="15">Expert +15</option></select></div>
+        </div>
+        <p class="field-hint">A configuração é aplicada a todos os agentes selecionados. Você pode editar cada um depois.</p>
+      </div>
+      <div id="add-threat-fields" hidden>
+        <div class="form-grid">
+          <div><label for="add-threat-dice">DADOS d20</label><input id="add-threat-dice" type="number" min="1" max="12" value="2" required></div>
+          <div><label for="add-threat-bonus">BÔNUS DO GRUPO</label><input id="add-threat-bonus" type="number" min="-99" max="99" value="0" required></div>
+        </div>
+        <p class="field-hint">Um único teste para todo o grupo. Quando as ameaças tiverem bônus diferentes, informe aqui o menor bônus de Iniciativa.</p>
+      </div>
+      <div class="form-grid">
+        <div><label for="add-bonus">MODIFICADOR SITUACIONAL</label><input id="add-bonus" type="number" min="-99" max="99" value="0"></div>
+        <div><label for="add-dice-mod">DADOS ADICIONAIS (+/−)</label><input id="add-dice-mod" type="number" min="-5" max="5" value="0"></div>
+      </div>
+      <label class="check-line"><input id="add-surprised" type="checkbox"><span>Surpreendido — não age na primeira rodada</span></label>
+      <div class="dialog-actions"><button id="cancel-add" class="text-action" type="button">CANCELAR</button><button class="dialog-submit" type="submit">REGISTRAR ENVOLVIDOS</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="edit-dialog" class="record-dialog">
     <form id="edit-form">
-      <div class="dialog-head">
-        <div><span class="eyebrow">CONFIGURAÇÃO INDIVIDUAL</span><h2>Editar combatente</h2></div>
-        <button id="close-dialog" class="icon-button" type="button" aria-label="Fechar">×</button>
+      <div class="dialog-heading">
+        <div><span class="eyebrow">DOSSIÊ INDIVIDUAL · <b id="edit-role-label">AGENTE</b></span><h2>ALTERAR REGISTRO</h2></div>
+        <button id="close-edit" class="icon-button" type="button" aria-label="Fechar">×</button>
       </div>
       <input id="edit-id" type="hidden">
-      <label for="edit-name">Nome exibido</label>
-      <input id="edit-name" maxlength="80" autocomplete="off" required>
-      <div class="form-two">
-        <div><label for="edit-initiative">Iniciativa</label><input id="edit-initiative" type="number" min="-99" max="999" step="0.01" required></div>
-        <div class="form-hint"><span class="eyebrow">DICA</span><p>Valores maiores agem primeiro. Empates são ordenados pelo nome.</p></div>
+      <label for="edit-name">NOME / IDENTIFICAÇÃO</label>
+      <input id="edit-name" maxlength="80" required autocomplete="off">
+      <div id="edit-agent-fields">
+        <div class="form-grid">
+          <div><label for="edit-agility">AGILIDADE (0–5)</label><input id="edit-agility" type="number" min="0" max="5" step="1" required></div>
+          <div><label for="edit-training">TREINAMENTO</label><select id="edit-training"><option value="0">Destreinado +0</option><option value="5">Treinado +5</option><option value="10">Veterano +10</option><option value="15">Expert +15</option></select></div>
+        </div>
+        <p class="field-hint">Perícia Iniciativa: Agilidade + bônus de treinamento.</p>
       </div>
-      <label for="edit-conditions">Condições <small>Separe por vírgulas</small></label>
-      <input id="edit-conditions" maxlength="120" placeholder="Ex.: Atordoado, Caído">
-      <label for="edit-note">Anotações</label>
-      <textarea id="edit-note" rows="3" maxlength="500" placeholder="Anotações privadas para este participante..."></textarea>
-      <div class="dialog-actions">
-        <button id="cancel-edit" class="button button-quiet" type="button">Cancelar</button>
-        <button class="button button-primary" type="submit">Salvar alterações</button>
+      <div id="edit-threat-fields" hidden>
+        <div class="form-grid">
+          <div><label for="edit-threat-dice">DADOS d20</label><input id="edit-threat-dice" type="number" min="1" max="12" required></div>
+          <div><label for="edit-threat-bonus">MENOR BÔNUS DO GRUPO</label><input id="edit-threat-bonus" type="number" min="-99" max="99" required></div>
+        </div>
+        <p class="field-hint">O grupo de ameaças compartilha um único resultado de iniciativa.</p>
       </div>
+      <div class="form-grid">
+        <div><label for="edit-bonus">MODIFICADOR</label><input id="edit-bonus" type="number" min="-99" max="99"></div>
+        <div><label for="edit-dice-mod">DADOS ADICIONAIS (+/−)</label><input id="edit-dice-mod" type="number" min="-5" max="5"></div>
+      </div>
+      <label class="check-line"><input id="edit-surprised" type="checkbox"><span>Surpreendido — perde o turno na rodada 1</span></label>
+      <label for="edit-conditions">CONDIÇÕES <small>Separe por vírgulas</small></label>
+      <input id="edit-conditions" maxlength="120" placeholder="Ex.: Abalado, Caído, Vulnerável">
+      <label for="edit-note">NOTAS DA OPERAÇÃO</label>
+      <textarea id="edit-note" rows="2" maxlength="500" placeholder="Observações para o mestre..."></textarea>
+      <p id="edit-roll-info" class="field-hint"></p>
+      <div class="dialog-actions"><button id="cancel-edit" class="text-action" type="button">CANCELAR</button><button class="dialog-submit" type="submit">SALVAR DOSSIÊ</button></div>
     </form>
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=1.0.1"></script>
+  <script type="module" src="./app.js?v=2.0.0"></script>
 </body>
 </html>

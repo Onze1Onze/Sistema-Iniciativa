@@ -10,7 +10,7 @@ import {
   progressPercent,
   initials,
   getPortraitUrl
-} from "./core.js?v=1.0.0";
+} from "./core.js?v=1.0.1";
 
 const EXTENSION_ID = "com.onze1onze.sistema-iniciativa";
 const ITEM_KEY = EXTENSION_ID + "/combatant";

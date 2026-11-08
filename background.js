@@ -1,10 +1,12 @@
 import OBR from "https://esm.sh/@owlbear-rodeo/sdk@3.1.0";
-import {normalizeSceneState} from "./core.js?v=2.0.0";
+import {normalizeSceneState} from "./core.js?v=2.0.1";
 const ID="com.onze1onze.sistema-iniciativa",KEY=ID+"/combatant",SCENE=ID+"/combat";
 OBR.onReady(async()=>{try{
  await OBR.contextMenu.create({id:ID+"/combat-menu",icons:[
- {icon:"/Sistema-Iniciativa/icons/add.svg",label:"Adicionar como agente",filter:{every:[{key:"layer",value:"CHARACTER"},{key:"type",value:"IMAGE"},{key:["metadata",KEY],value:undefined}]}},
- {icon:"/Sistema-Iniciativa/icons/remove.svg",label:"Remover da iniciativa",filter:{every:[{key:"layer",value:"CHARACTER"},{key:["metadata",KEY],value:undefined,negate:true}]}}
+ {icon:"/Sistema-Iniciativa/icons/add.svg",label:"Alternar na iniciativa",filter:{every:[
+  {key:"layer",value:"CHARACTER"},
+  {key:"type",value:"IMAGE"}
+ ]}}
  ],async onClick(context){
   const selected=context.items.filter(x=>x.layer==="CHARACTER"&&x.type==="IMAGE");if(!selected.length)return;
   if(selected.every(x=>Boolean(x.metadata?.[KEY]))){await OBR.scene.items.updateItems(selected.map(x=>x.id),items=>{for(const item of items){if(item.metadata)delete item.metadata[KEY];}});return;}

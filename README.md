@@ -16,8 +16,8 @@ Tracker de combate para Owlbear Rodeo com ordem sincronizada, painel cinematogr�
 
 ## Uso
 
-- Use a ação **Iniciativa** no topo da sala para abrir o painel.
-- Selecione um ou mais tokens da camada **Personagem** e use **Adicionar selecionados** ou o menu contextual **Adicionar à iniciativa**.
+- Use a ação **Sistema de Iniciativa** na barra superior da sala para abrir o painel.
+- Selecione um ou mais tokens da camada **Personagem** e use **Adicionar selecionados** ou o menu contextual **Alternar na iniciativa**.
 - Cada combatente recebe uma rolagem inicial de d20; o valor pode ser editado manualmente.
 - **Iniciar combate** define o primeiro turno da ordem.
 - **Próximo turno** avança o destaque; ao ultrapassar o último combatente, a rodada aumenta.
@@ -38,26 +38,30 @@ Tracker de combate para Owlbear Rodeo com ordem sincronizada, painel cinematogr�
 ## Dados e compatibilidade
 
 - SDK oficial `@owlbear-rodeo/sdk@3.1.0`, carregado como módulo ESM.
-- Sem dependências de build, servidor próprio, armazenamento externo ou permissões especiais.
+- Sem servidor próprio ou banco externo. O GitHub Pages entrega os arquivos estáticos.
 - Namespace de metadados: `com.onze1onze.sistema-iniciativa`.
-- A extensão apenas lê e grava metadados próprios nos tokens e na cena.
+- A extensão lê e grava somente os metadados próprios nos tokens e na cena.
 - A ordem e o estado do encontro são compartilhados pela própria cena do Owlbear Rodeo.
-- Alterações feitas ao mesmo tempo por diferentes usuários podem conflitar, conforme o modelo de sincronização do Owlbear; recomenda-se que o mestre controle os avanços de turno.
+- Alterações simultâneas de diferentes usuários podem conflitar conforme o modelo de sincronização do Owlbear; recomenda-se que o mestre controle os avanços de turno.
 
-## Desenvolvimento
+## Desenvolvimento e testes
 
-A extensão é estática e pode ser servida diretamente pelo GitHub Pages. Não há etapa de build.
+Não há etapa de build. Os arquivos estáticos podem ser servidos diretamente pelo GitHub Pages.
 
 Arquivos principais:
 - `manifest.json`: registro da ação do Owlbear e página de fundo.
 - `index.html`, `styles.css`, `app.js`: painel e interface.
-- `background.html`, `background.js`: integração de menu contextual.
+- `background.html`, `background.js`: integração do menu contextual.
+- `core.js`: regras puras de ordenação, d20 e ciclo de turnos.
 - `icon.svg`, `icons/`: ícones da extensão.
-- `tests/initiative.test.mjs`: testes unitários das regras de ordenação e ciclo de turnos.
+- `tests/initiative.test.mjs`: testes unitários das regras de iniciativa.
 
-Execute os testes com Node.js 18 ou superior:
+Execute com Node.js 18 ou superior:
 
-`node --test tests/*.test.mjs`
+- `npm run check` — valida a sintaxe dos módulos JavaScript.
+- `npm test` — executa os testes unitários.
+
+O GitHub Actions executa essas verificações em cada push e pull request para `main`.
 
 ## Limitações conhecidas
 

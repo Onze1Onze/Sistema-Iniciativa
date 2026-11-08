@@ -202,3 +202,6 @@ main{width:100%;max-width:440px;margin:0 auto;padding:11px 11px 17px}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+.form-grid.single{grid-template-columns:1fr}
+.portrait-unit img + .portrait-fallback{display:none}
+.active-portrait img + span{display:none}

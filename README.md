@@ -14,6 +14,8 @@ Tracker de combate para Owlbear Rodeo com ordem sincronizada, painel cinematogr�
 
 6. Habilite a extensão na sala.
 
+Se ainda aparecer 404, abra [Settings → Pages](https://github.com/Onze1Onze/Sistema-Iniciativa/settings/pages) e confirme que a publicação está configurada em `main` / `/(root)`. O GitHub Pages precisa ser ativado nessa tela pelo proprietário ou mantenedor do repositório; o código sozinho não ativa a hospedagem.
+
 ## Uso
 
 - Use a ação **Sistema de Iniciativa** na barra superior da sala para abrir o painel.

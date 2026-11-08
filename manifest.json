@@ -4,12 +4,12 @@
   "manifest_version": 1,
   "description": "Tracker de combate com linha de iniciativa animada e turnos sincronizados.",
   "author": "Onze1Onze",
-  "icon": "/icon.svg",
-  "background_url": "/background.html",
+  "icon": "/Sistema-Iniciativa/icon.svg",
+  "background_url": "/Sistema-Iniciativa/background.html",
   "action": {
     "title": "Sistema de Iniciativa",
-    "icon": "/icon.svg",
-    "popover": "/",
+    "icon": "/Sistema-Iniciativa/icon.svg",
+    "popover": "/Sistema-Iniciativa/",
     "width": 780,
     "height": 700
   }

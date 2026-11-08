@@ -13,7 +13,7 @@ OBR.onReady(async () => {
       id: EXTENSION_ID + "/token-menu",
       icons: [
         {
-          icon: "/icons/toggle.svg",
+          icon: "/Sistema-Iniciativa/icons/toggle.svg",
           label: "Alternar na iniciativa",
           filter: { every: [{ key: "layer", value: "CHARACTER" }] }
         }

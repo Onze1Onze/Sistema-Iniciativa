@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#100e10">
   <title>Ordem Paranormal · Iniciativa</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=2.0.0">
+  <link rel="stylesheet" href="./styles.css?v=2.0.1">
 </head>
 <body>
   <div class="app-shell">
@@ -42,7 +42,7 @@
       <section id="turn-banner" class="turn-banner" aria-live="polite">
         <div id="active-portrait" class="active-portrait"><span>?</span></div>
         <div class="turn-main">
-          <span class="eyebrow">AGENTE EM AÇÃO</span>
+          <span class="eyebrow">ENVOLVIDO EM AÇÃO</span>
           <strong id="active-name">Nenhum turno ativo</strong>
           <span id="active-meta">Inicie o combate para estabelecer a ordem.</span>
         </div>
@@ -54,7 +54,7 @@
 
       <section class="rule-note">
         <span class="rule-symbol">!</span>
-        <p><b>INICIATIVA · AGILIDADE</b> — role d20 por ponto de AGI, escolha o maior e some o treinamento. AGI 0: 2d20, menor resultado. Empates exigem nova rolagem.</p>
+        <p><b>INICIATIVA · ORDEM PARANORMAL</b> — agentes: 1d20 por ponto de AGI, maior resultado + treinamento. AGI 0: 2d20, menor. Ameaças: 1d20 + menor bônus do grupo. Empates: novas rolagens.</p>
       </section>
 
       <section class="controls-panel">
@@ -114,15 +114,12 @@
         <p class="field-hint">A configuração é aplicada a todos os agentes selecionados. Você pode editar cada um depois.</p>
       </div>
       <div id="add-threat-fields" hidden>
-        <div class="form-grid">
-          <div><label for="add-threat-dice">DADOS d20</label><input id="add-threat-dice" type="number" min="1" max="12" value="2" required></div>
-          <div><label for="add-threat-bonus">BÔNUS DO GRUPO</label><input id="add-threat-bonus" type="number" min="-99" max="99" value="0" required></div>
-        </div>
-        <p class="field-hint">Um único teste para todo o grupo. Quando as ameaças tiverem bônus diferentes, informe aqui o menor bônus de Iniciativa.</p>
+        <label for="add-threat-bonus">MENOR BÔNUS DE INICIATIVA DO GRUPO</label>
+        <input id="add-threat-bonus" type="number" min="-99" max="99" value="0" required>
+        <p class="field-hint">O mestre realiza um único teste: 1d20 + este bônus. Se as ameaças tiverem bônus diferentes, use o menor.</p>
       </div>
-      <div class="form-grid">
-        <div><label for="add-bonus">MODIFICADOR SITUACIONAL</label><input id="add-bonus" type="number" min="-99" max="99" value="0"></div>
-        <div><label for="add-dice-mod">DADOS ADICIONAIS (+/−)</label><input id="add-dice-mod" type="number" min="-5" max="5" value="0"></div>
+      <div class="form-grid single">
+        <div><label for="add-bonus">BÔNUS / PENALIDADE SITUACIONAL</label><input id="add-bonus" type="number" min="-99" max="99" value="0"></div>
       </div>
       <label class="check-line"><input id="add-surprised" type="checkbox"><span>Surpreendido — não age na primeira rodada</span></label>
       <div class="dialog-actions"><button id="cancel-add" class="text-action" type="button">CANCELAR</button><button class="dialog-submit" type="submit">REGISTRAR ENVOLVIDOS</button></div>
@@ -146,15 +143,12 @@
         <p class="field-hint">Perícia Iniciativa: Agilidade + bônus de treinamento.</p>
       </div>
       <div id="edit-threat-fields" hidden>
-        <div class="form-grid">
-          <div><label for="edit-threat-dice">DADOS d20</label><input id="edit-threat-dice" type="number" min="1" max="12" required></div>
-          <div><label for="edit-threat-bonus">MENOR BÔNUS DO GRUPO</label><input id="edit-threat-bonus" type="number" min="-99" max="99" required></div>
-        </div>
-        <p class="field-hint">O grupo de ameaças compartilha um único resultado de iniciativa.</p>
+        <label for="edit-threat-bonus">MENOR BÔNUS DE INICIATIVA DO GRUPO</label>
+        <input id="edit-threat-bonus" type="number" min="-99" max="99" required>
+        <p class="field-hint">Um único teste compartilhado: 1d20 + este bônus.</p>
       </div>
-      <div class="form-grid">
-        <div><label for="edit-bonus">MODIFICADOR</label><input id="edit-bonus" type="number" min="-99" max="99"></div>
-        <div><label for="edit-dice-mod">DADOS ADICIONAIS (+/−)</label><input id="edit-dice-mod" type="number" min="-5" max="5"></div>
+      <div class="form-grid single">
+        <div><label for="edit-bonus">BÔNUS / PENALIDADE SITUACIONAL</label><input id="edit-bonus" type="number" min="-99" max="99"></div>
       </div>
       <label class="check-line"><input id="edit-surprised" type="checkbox"><span>Surpreendido — perde o turno na rodada 1</span></label>
       <label for="edit-conditions">CONDIÇÕES <small>Separe por vírgulas</small></label>
@@ -167,6 +161,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=2.0.0"></script>
+  <script type="module" src="./app.js?v=2.0.1"></script>
 </body>
 </html>

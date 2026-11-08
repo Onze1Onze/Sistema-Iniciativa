@@ -12,7 +12,7 @@ import {
   progressPercent,
   initials,
   getPortraitUrl
-} from "./core.js?v=2.0.0";
+} from "./core.js?v=2.0.1";
 
 const EXTENSION_ID = "com.onze1onze.sistema-iniciativa";
 const ITEM_KEY = EXTENSION_ID + "/combatant";
@@ -114,14 +114,18 @@ function bindPortraitFallback(root) {
 function roleDetails(data) {
   if (data.role === "THREAT") {
     const flat = data.threatBonus + data.bonus;
-    return data.threatDice + "d20 · BÔNUS " + (flat >= 0 ? "+" : "") + flat;
+    return "1d20 · BÔNUS " + (flat >= 0 ? "+" : "") + flat;
   }
   const grade = data.training === 0 ? "DESTREINADO" : data.training === 5 ? "TREINADO" : data.training === 10 ? "VETERANO" : "EXPERT";
   return "AGI " + data.agility + " · " + grade + " " + (data.training >= 0 ? "+" : "") + data.training;
 }
 
 function rollDetails(data) {
-  if (!data.roll) return "TESTE PENDENTE · AJUSTE A FICHA E ROLE";
+  if (!data.roll) {
+    return data.initiative === null
+      ? "TESTE PENDENTE · AJUSTE A FICHA E ROLE"
+      : "RESULTADO LEGADO " + data.initiative + " · ROLE PELA REGRA OP";
+  }
   const dice = data.roll.dice.join(" · ");
   const kept = data.roll.keep === "lowest" ? "MENOR" : "MAIOR";
   const bonus = (data.roll.bonus >= 0 ? "+" : "") + data.roll.bonus;
@@ -151,7 +155,7 @@ function renderEntry(entry, index, activeId, ties) {
       '<span class="operative-rank">' + String(index + 1).padStart(2, "0") + "</span>" +
       portraitMarkup(entry, "entry-portraits") +
       '<div class="entry-identity"><strong>' + escapeHTML(data.displayName || entry.name) + '</strong><small>' + role + " · " + escapeHTML(roleDetails(data)) + "</small></div>" +
-      '<div class="entry-score ' + (data.initiative === null ? "pending" : "") + '"><span>INICIATIVA</span><strong>' + escapeHTML(score) + "</strong></div>" +
+      '<div class="entry-score ' + (!data.roll ? "pending" : "") + '"><span>' + (!data.roll ? (data.initiative === null ? "SEM TESTE" : "LEGADO") : "INICIATIVA") + '</span><strong>' + escapeHTML(score) + "</strong></div>" +
     "</div>" +
     (flags.length ? '<div class="entry-flags">' + flags.join("") + "</div>" : "") +
     '<div class="roll-detail">' + escapeHTML(rollDetails(data)) + "</div>" +
@@ -185,7 +189,7 @@ function renderTurn(participants) {
     const first = active.members[0];
     const url = getPortraitUrl(first);
     portrait.innerHTML = url
-      ? '<img data-portrait src="' + escapeHTML(url) + '" alt="" draggable="false">'
+      ? '<img data-portrait src="' + escapeHTML(url) + '" alt="" draggable="false"><span>' + escapeHTML(initials(active.combatant.displayName || active.name)) + '</span>'
       : "<span>" + escapeHTML(initials(active.combatant.displayName || active.name)) + "</span>";
     bindPortraitFallback(portrait);
   } else {
@@ -200,7 +204,7 @@ function render() {
   const participants = getParticipants();
   const count = participants.length;
   const ties = findInitiativeTies(participants);
-  const unrolled = participants.filter((entry) => entry.combatant.initiative === null);
+  const unrolled = participants.filter((entry) => !entry.combatant.roll);
   const active = participants.find((entry) => entry.id === sceneState.activeId);
 
   $("#round-number").textContent = sceneState.started ? String(sceneState.round).padStart(2, "0") : "—";
@@ -217,7 +221,7 @@ function render() {
   $("#resolve-ties").disabled = busy;
   $("#add-selected").disabled = busy || !sceneReady;
   $("#roll-initiative").disabled = busy || count === 0 || (sceneState.started && unrolled.length === 0);
-  $("#previous-turn").disabled = busy || !sceneState.started || count === 0;
+  $("#previous-turn").disabled = busy || !sceneState.started || count === 0 || !sceneState.activeId;
   $("#next-turn").disabled = busy || !sceneState.started || count === 0;
   $("#start-combat").hidden = sceneState.started;
   $("#end-combat").hidden = !sceneState.started;
@@ -225,8 +229,10 @@ function render() {
   $("#start-combat").disabled = busy || count === 0 || unrolled.length > 0 || ties.length > 0;
   $("#phase-note").textContent = !sceneReady
     ? "Abra uma cena no Owlbear Rodeo para sincronizar os registros."
-    : sceneState.started
-      ? "A ordem permanece fixa durante o combate. Novos envolvidos agem a partir da próxima rodada."
+    : sceneState.started && !sceneState.activeId
+      ? "Nenhum envolvido age nesta rodada. Avance para a próxima rodada."
+      : sceneState.started
+        ? "A ordem permanece fixa durante o combate. Novos envolvidos agem a partir da próxima rodada."
       : unrolled.length
         ? "Há registros sem teste de iniciativa. Revise Agilidade, treinamento e modificadores antes de iniciar."
         : ties.length
@@ -276,7 +282,7 @@ async function persistCombatant(entry, values) {
     ...values,
     groupId: entry.groupId
   });
-  const mechanicalKeys = ["role", "agility", "training", "bonus", "threatBonus", "diceModifier", "threatDice"];
+  const mechanicalKeys = ["role", "agility", "training", "bonus", "threatBonus"];
   const mechanicalChange = mechanicalKeys.some((key) => current[key] !== next[key]);
   if (mechanicalChange) {
     next.initiative = null;
@@ -320,10 +326,8 @@ async function addSelected() {
     $("#add-name").value = pendingAdd.length > 1 ? "Ameaças" : (pendingAdd[0].name || "Ameaça");
     $("#add-agility").value = "1";
     $("#add-training").value = "0";
-    $("#add-threat-dice").value = "2";
     $("#add-threat-bonus").value = "0";
     $("#add-bonus").value = "0";
-    $("#add-dice-mod").value = "0";
     $("#add-surprised").checked = false;
     toggleAddFields();
     $("#add-dialog").showModal();
@@ -338,6 +342,9 @@ function toggleAddFields() {
   $("#add-agent-fields").hidden = threat;
   $("#add-threat-fields").hidden = !threat;
   $("#add-name-wrap").hidden = !threat;
+  $("#add-agility").required = !threat;
+  $("#add-training").required = !threat;
+  $("#add-threat-bonus").required = threat;
 }
 
 async function submitAdd(event) {
@@ -350,8 +357,6 @@ async function submitAdd(event) {
   const training = Number($("#add-training").value);
   const bonus = Number($("#add-bonus").value) || 0;
   const threatBonus = Number($("#add-threat-bonus").value) || 0;
-  const diceModifier = Number($("#add-dice-mod").value) || 0;
-  const threatDice = Number($("#add-threat-dice").value) || 2;
   const surprised = $("#add-surprised").checked;
   const availableFromRound = sceneState.started ? sceneState.round + 1 : 1;
   const now = Date.now();
@@ -368,8 +373,6 @@ async function submitAdd(event) {
       training: role === "AGENT" ? training : 0,
       bonus,
       threatBonus: role === "THREAT" ? threatBonus : 0,
-      diceModifier,
-      threatDice,
       initiative: null,
       roll: null,
       surprised,
@@ -447,10 +450,10 @@ async function rollInitiative() {
   const participants = getParticipants();
   if (!participants.length) return;
   const targets = sceneState.started
-    ? participants.filter((entry) => entry.combatant.initiative === null)
+    ? participants.filter((entry) => !entry.combatant.roll)
     : participants;
   if (!targets.length) {
-    notify("A iniciativa já foi definida. Ela permanece fixa durante as rodadas.", "warning");
+    notify("A iniciativa já tem um teste válido. Ela permanece fixa durante as rodadas.", "warning");
     return;
   }
   await rollEntries(
@@ -469,7 +472,7 @@ async function resolveTies() {
 async function startCombat() {
   const participants = getParticipants();
   if (!participants.length) return;
-  if (participants.some((entry) => entry.combatant.initiative === null)) {
+  if (participants.some((entry) => !entry.combatant.roll)) {
     notify("Há registros sem teste de iniciativa.", "warning");
     return;
   }
@@ -477,14 +480,18 @@ async function startCombat() {
     notify("Resolva os empates antes de iniciar.", "warning");
     return;
   }
-  const next = advanceTurn(participants, {
+  const firstActor = participants.find((entry) => isEligibleInRound(entry, 1));
+  const next = {
     started: true,
     round: 1,
-    activeId: null
-  }, 1);
+    activeId: firstActor?.id || null,
+    changedAt: Date.now()
+  };
   await persistScene(next);
   animateTurnChange();
-  notify(next.round > 1 ? "Combate iniciado. A primeira rodada não tem ações devido à surpresa." : "Combate iniciado.", "success");
+  notify(firstActor
+    ? "Combate iniciado. A iniciativa permanece fixa."
+    : "Combate iniciado. Todos estão surpreendidos; avance para a segunda rodada.", "success");
 }
 
 function animateTurnChange() {
@@ -581,18 +588,21 @@ function openEditor(id) {
   $("#edit-role-label").textContent = data.role === "THREAT" ? "GRUPO DE AMEAÇAS" : "AGENTE";
   $("#edit-agent-fields").hidden = data.role !== "AGENT";
   $("#edit-threat-fields").hidden = data.role !== "THREAT";
+  $("#edit-agility").required = data.role === "AGENT";
+  $("#edit-training").required = data.role === "AGENT";
+  $("#edit-threat-bonus").required = data.role === "THREAT";
   $("#edit-agility").value = data.agility;
   $("#edit-training").value = String(data.training);
-  $("#edit-threat-dice").value = data.threatDice;
   $("#edit-threat-bonus").value = data.threatBonus;
   $("#edit-bonus").value = data.bonus;
-  $("#edit-dice-mod").value = data.diceModifier;
   $("#edit-surprised").checked = data.surprised;
   $("#edit-conditions").value = data.conditions.join(", ");
   $("#edit-note").value = data.note;
-  $("#edit-roll-info").textContent = data.initiative === null
-    ? "Sem resultado de iniciativa. Salvar atributos não realiza a rolagem."
-    : "Resultado atual: " + data.initiative + ". Alterar os parâmetros do teste apagará este resultado.";
+  $("#edit-roll-info").textContent = !data.roll
+    ? (data.initiative === null
+      ? "Sem teste válido de iniciativa. Salvar não realiza a rolagem."
+      : "Resultado antigo: " + data.initiative + ". Refaça o teste usando as regras de Ordem Paranormal.")
+    : "Resultado atual: " + data.initiative + ". Alterar Agilidade, treinamento ou bônus apaga este resultado.";
   $("#edit-dialog").showModal();
   $("#edit-name").focus();
 }
@@ -607,10 +617,8 @@ async function submitEdit(event) {
     displayName: $("#edit-name").value.trim(),
     agility: Number($("#edit-agility").value),
     training: Number($("#edit-training").value),
-    threatDice: Number($("#edit-threat-dice").value),
     threatBonus: Number($("#edit-threat-bonus").value),
     bonus: Number($("#edit-bonus").value),
-    diceModifier: Number($("#edit-dice-mod").value),
     surprised: $("#edit-surprised").checked,
     conditions: $("#edit-conditions").value.split(",").map((part) => part.trim()).filter(Boolean).slice(0, 8),
     note: $("#edit-note").value.trim()

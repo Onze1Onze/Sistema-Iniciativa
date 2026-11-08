@@ -1,11 +1,11 @@
 {
   "name": "Sistema Iniciativa",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "manifest_version": 1,
   "description": "Tracker de combate com linha de iniciativa animada e turnos sincronizados.",
   "author": "Onze1Onze",
   "icon": "/Sistema-Iniciativa/icon.svg",
-  "background_url": "/Sistema-Iniciativa/background.html?v=1.0.1",
+  "background_url": "/Sistema-Iniciativa/background.html?v=1.0.2",
   "action": {
     "title": "Sistema de Iniciativa",
     "icon": "/Sistema-Iniciativa/icon.svg",

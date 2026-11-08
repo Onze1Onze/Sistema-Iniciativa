@@ -14,7 +14,7 @@ Painel vertical e compacto com referências de arquivos de investigação, relat
 - Agentes usam a perícia **Iniciativa (Agilidade)**: 1d20 por ponto de AGI, escolhe o maior e soma o treinamento.
 - AGI 0: 2d20, escolhe o menor.
 - Treinamento: destreinado +0, treinado +5, veterano +10, expert +15.
-- Ameaças: o mestre pode registrar vários tokens como um único grupo e usar um teste compartilhado; informe o menor bônus do grupo quando forem diferentes.
+- Ameaças: o mestre pode registrar vários tokens como um único grupo e faz um único teste compartilhado de **1d20 + bônus de Iniciativa**; quando os bônus forem diferentes, usa o menor bônus do grupo.
 - Empates são resolvidos com novas rolagens dos envolvidos.
 - Surpreendidos não agem na primeira rodada.
 - Entradas tardias só ficam elegíveis na rodada seguinte.

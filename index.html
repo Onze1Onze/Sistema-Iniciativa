@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#101519">
+  <title>Sistema de Iniciativa</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css?v=1.0.0">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div>
+          <p class="eyebrow">COMBAT MANAGEMENT SYSTEM</p>
+          <h1>Sistema <em>Iniciativa</em></h1>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span id="connection" class="connection"><i></i> Conectando</span>
+        <button id="refresh" class="icon-button" type="button" title="Atualizar painel" aria-label="Atualizar painel">↻</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="combat-overview">
+        <div class="overview-copy">
+          <div class="eyebrow">ENCONTRO ATUAL</div>
+          <div class="overview-title">
+            <h2 id="combat-title">Preparação do encontro</h2>
+            <span id="combat-state" class="state-pill is-idle">INATIVO</span>
+          </div>
+          <p id="combat-subtitle">Adicione personagens para organizar a ordem de ação.</p>
+        </div>
+        <div class="round-counter">
+          <span class="eyebrow">RODADA</span>
+          <strong id="round-number">—</strong>
+        </div>
+      </section>
+
+      <section class="turn-banner" id="turn-banner" aria-live="polite">
+        <div class="turn-emblem"><span class="emblem-core">✦</span></div>
+        <div class="turn-copy">
+          <span class="eyebrow">TURNO ATUAL</span>
+          <strong id="active-name">Nenhum combatente ativo</strong>
+          <span id="active-meta">Inicie o encontro para definir o primeiro turno.</span>
+        </div>
+        <div class="turn-progress">
+          <div class="progress-label"><span>PROGRESSO DA RODADA</span><b id="progress-value">0%</b></div>
+          <div class="progress-track"><i id="progress-bar"></i></div>
+        </div>
+      </section>
+
+      <section class="timeline-section">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">ORDEM DE COMBATE</span>
+            <h3>Linha de iniciativa</h3>
+          </div>
+          <span id="timeline-count" class="subtle-count">0 PARTICIPANTES</span>
+        </div>
+        <div id="timeline" class="timeline" aria-label="Linha de iniciativa">
+          <div class="empty-timeline">A linha de iniciativa aparecerá aqui.</div>
+        </div>
+      </section>
+
+      <section class="control-bar">
+        <div class="control-group">
+          <button id="add-selected" class="button button-secondary" type="button"><span class="button-icon">＋</span> Adicionar selecionados</button>
+          <button id="roll-all" class="button button-quiet" type="button" title="Rolar novamente a iniciativa de todos">↻ Rolar todos</button>
+        </div>
+        <div class="control-group turn-controls">
+          <button id="previous-turn" class="button button-quiet square-button" type="button" title="Turno anterior" aria-label="Turno anterior">‹</button>
+          <button id="start-combat" class="button button-primary" type="button">Iniciar combate <span>▶</span></button>
+          <button id="next-turn" class="button button-primary next-button" type="button" disabled>Próximo turno <span>→</span></button>
+        </div>
+      </section>
+
+      <section class="combatants-section">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">PARTICIPANTES</span>
+            <h3>Quadro de combate</h3>
+          </div>
+          <div class="heading-actions">
+            <span id="combatant-count" class="subtle-count">0 NA ORDEM</span>
+            <button id="clear-combat" class="text-button" type="button">Limpar encontro</button>
+          </div>
+        </div>
+        <div class="table-head">
+          <span>COMBATENTE</span>
+          <span>INICIATIVA</span>
+          <span>CONDIÇÕES</span>
+          <span>AÇÕES</span>
+        </div>
+        <div id="combatant-list" class="combatant-list">
+          <div class="empty-state">
+            <div class="empty-glyph">✧</div>
+            <strong>Nenhum participante registrado</strong>
+            <p>Selecione tokens da camada Personagem e adicione-os ao encontro.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>INICIATIVA <b>·</b> SINCRONIZADA COM A CENA</span>
+      <span id="save-state">Aguardando sala do Owlbear Rodeo</span>
+    </footer>
+  </div>
+
+  <dialog id="edit-dialog" class="edit-dialog">
+    <form id="edit-form">
+      <div class="dialog-head">
+        <div><span class="eyebrow">CONFIGURAÇÃO INDIVIDUAL</span><h2>Editar combatente</h2></div>
+        <button id="close-dialog" class="icon-button" type="button" aria-label="Fechar">×</button>
+      </div>
+      <input id="edit-id" type="hidden">
+      <label for="edit-name">Nome exibido</label>
+      <input id="edit-name" maxlength="80" autocomplete="off" required>
+      <div class="form-two">
+        <div><label for="edit-initiative">Iniciativa</label><input id="edit-initiative" type="number" min="-99" max="999" step="0.01" required></div>
+        <div class="form-hint"><span class="eyebrow">DICA</span><p>Valores maiores agem primeiro. Empates são ordenados pelo nome.</p></div>
+      </div>
+      <label for="edit-conditions">Condições <small>Separe por vírgulas</small></label>
+      <input id="edit-conditions" maxlength="120" placeholder="Ex.: Atordoado, Caído">
+      <label for="edit-note">Anotações</label>
+      <textarea id="edit-note" rows="3" maxlength="500" placeholder="Anotações privadas para este participante..."></textarea>
+      <div class="dialog-actions">
+        <button id="cancel-edit" class="button button-quiet" type="button">Cancelar</button>
+        <button class="button button-primary" type="submit">Salvar alterações</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js?v=1.0.0"></script>
+</body>
+</html>
